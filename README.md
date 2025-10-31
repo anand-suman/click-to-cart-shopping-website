@@ -386,10 +386,6 @@ The application supports the following product categories:
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
-## 👨‍💻 Author
-
-- **Anand Suman** - [@anand-suman](https://github.com/anand-suman)
-
 ## 📞 Support
 
 For support, please open an issue in the repository.
