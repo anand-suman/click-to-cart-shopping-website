@@ -2,7 +2,6 @@ import React, { useState } from 'react'
 import { CgClose } from "react-icons/cg";
 import productCategory from '../helpers/productCategory';
 import { FaCloudUploadAlt } from "react-icons/fa";
-import uploadImage from '../helpers/uploadImage';
 import DisplayImage from './DisplayImage';
 import { MdDelete } from "react-icons/md";
 import SummaryApi from '../common';
@@ -23,6 +22,7 @@ const UploadProduct = ({
   })
   const [openFullScreenImage,setOpenFullScreenImage] = useState(false)
   const [fullScreenImage,setFullScreenImage] = useState("")
+  const [files,setFiles] = useState([]) // File[] for local upload
 
 
   const handleOnChange = (e)=>{
@@ -37,13 +37,14 @@ const UploadProduct = ({
   }
 
   const handleUploadProduct = async(e) => {
-    const file = e.target.files[0]
-    const uploadImageCloudinary = await uploadImage(file)
-
+    const selected = Array.from(e.target.files || [])
+    if(selected.length === 0) return
+    setFiles((prev)=> [...prev, ...selected])
+    const previews = selected.map((f)=> URL.createObjectURL(f))
     setData((preve)=>{
       return{
         ...preve,
-        productImage : [ ...preve.productImage, uploadImageCloudinary.url]
+        productImage : [ ...preve.productImage, ...previews]
       }
     })
   }
@@ -68,13 +69,26 @@ const UploadProduct = ({
   const handleSubmit = async(e) =>{
     e.preventDefault()
     
+    const priceNum = Number(data.price)
+    const sellingNum = Number(data.sellingPrice)
+    if(!Number.isFinite(priceNum) || !Number.isFinite(sellingNum)){
+      toast.error('Please enter valid numeric values for price and selling price')
+      return
+    }
+
+    const form = new FormData()
+    form.append('productName', data.productName)
+    form.append('brandName', data.brandName)
+    form.append('category', data.category)
+    form.append('description', data.description)
+    form.append('price', String(priceNum))
+    form.append('sellingPrice', String(sellingNum))
+    files.forEach((f)=> form.append('productImage', f))
+
     const response = await fetch(SummaryApi.uploadProduct.url,{
       method : SummaryApi.uploadProduct.method,
       credentials : 'include',
-      headers : {
-        "content-type" : "application/json"
-      },
-      body : JSON.stringify(data)
+      body : form
     })
 
     const responseData = await response.json()
@@ -148,7 +162,7 @@ const UploadProduct = ({
                         <div className='text-slate-500 flex justify-center items-center flex-col gap-2'>
                           <span className='text-4xl'><FaCloudUploadAlt/></span>
                           <p className='text-sm'>Upload Product Image</p>
-                          <input type='file' id='uploadImageInput'  className='hidden' onChange={handleUploadProduct}/>
+                          <input type='file' id='uploadImageInput' accept='image/*' multiple className='hidden' onChange={handleUploadProduct}/>
                         </div>
               </div>
               </label> 

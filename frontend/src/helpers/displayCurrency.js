@@ -5,8 +5,11 @@ const displayINRCurrency = (num) => {
         minimumFractionDigits : 2
     })
 
-    return formatter.format(num)
-
+    const value = Number(num)
+    if(!Number.isFinite(value)){
+        return formatter.format(0)
+    }
+    return formatter.format(value)
 }
 
 export default displayINRCurrency

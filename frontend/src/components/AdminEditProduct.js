@@ -2,10 +2,10 @@ import React, { useState } from 'react'
 import { CgClose } from "react-icons/cg";
 import productCategory from '../helpers/productCategory';
 import { FaCloudUploadAlt } from "react-icons/fa";
-import uploadImage from '../helpers/uploadImage';
+// switched to local upload via FormData
 import DisplayImage from './DisplayImage';
 import { MdDelete } from "react-icons/md";
-import SummaryApi from '../common';
+import SummaryApi, { backendDomin } from '../common';
 import {toast} from 'react-toastify'
 
 const AdminEditProduct = ({
@@ -26,6 +26,7 @@ const AdminEditProduct = ({
   })
   const [openFullScreenImage,setOpenFullScreenImage] = useState(false)
   const [fullScreenImage,setFullScreenImage] = useState("")
+  const [files,setFiles] = useState([])
 
 
   const handleOnChange = (e)=>{
@@ -40,13 +41,14 @@ const AdminEditProduct = ({
   }
 
   const handleUploadProduct = async(e) => {
-    const file = e.target.files[0]
-    const uploadImageCloudinary = await uploadImage(file)
-
+    const selected = Array.from(e.target.files || [])
+    if(selected.length === 0) return
+    setFiles((prev)=> [...prev, ...selected])
+    const previews = selected.map((f)=> URL.createObjectURL(f))
     setData((preve)=>{
       return{
         ...preve,
-        productImage : [ ...preve.productImage, uploadImageCloudinary.url]
+        productImage : [ ...preve.productImage, ...previews]
       }
     })
   }
@@ -71,13 +73,20 @@ const AdminEditProduct = ({
   const handleSubmit = async(e) =>{
     e.preventDefault()
     
+    const form = new FormData()
+    form.append('_id', data._id)
+    form.append('productName', data.productName)
+    form.append('brandName', data.brandName)
+    form.append('category', data.category)
+    form.append('description', data.description)
+    form.append('price', data.price)
+    form.append('sellingPrice', data.sellingPrice)
+    files.forEach((f)=> form.append('productImage', f))
+
     const response = await fetch(SummaryApi.updateProduct.url,{
       method : SummaryApi.updateProduct.method,
       credentials : 'include',
-      headers : {
-        "content-type" : "application/json"
-      },
-      body : JSON.stringify(data)
+      body : form
     })
 
     const responseData = await response.json()
@@ -151,7 +160,7 @@ const AdminEditProduct = ({
                      <div className='text-slate-500 flex justify-center items-center flex-col gap-2'>
                        <span className='text-4xl'><FaCloudUploadAlt/></span>
                        <p className='text-sm'>Upload Product Image</p>
-                       <input type='file' id='uploadImageInput'  className='hidden' onChange={handleUploadProduct}/>
+                       <input type='file' id='uploadImageInput' accept='image/*' multiple className='hidden' onChange={handleUploadProduct}/>
                      </div>
            </div>
            </label> 
@@ -161,17 +170,21 @@ const AdminEditProduct = ({
                      <div className='flex items-center gap-2'>
                          {
                            data.productImage.map((el,index)=>{
+                             // Process image URL - add backend domain if it starts with /uploads
+                             const imageUrl = el && typeof el === 'string' && el.startsWith('/uploads') 
+                                 ? (backendDomin + el) 
+                                 : el
                              return(
                                <div className='relative group'>
                                    <img 
-                                     src={el} 
-                                     alt={el} 
+                                     src={imageUrl} 
+                                     alt={el || 'Product image'} 
                                      width={80} 
                                      height={80}  
                                      className='bg-slate-100 border cursor-pointer'  
                                      onClick={()=>{
                                        setOpenFullScreenImage(true)
-                                       setFullScreenImage(el)
+                                       setFullScreenImage(imageUrl)
                                      }}/>
 
                                      <div className='absolute bottom-0 right-0 p-1 text-white bg-red-600 rounded-full hidden group-hover:block cursor-pointer' onClick={()=>handleDeleteProductImage(index)}>

@@ -10,6 +10,7 @@ const userLogout = require('../controller/user/userLogout')
 const allUsers = require('../controller/user/allUsers')
 const updateUser = require('../controller/user/updateUser')
 const UploadProductController = require('../controller/product/uploadProduct')
+const upload = require('../middleware/upload')
 const getProductController = require('../controller/product/getProduct')
 const updateProductController = require('../controller/product/updateProduct')
 const getCategoryProduct = require('../controller/product/getCategoryProductOne')
@@ -22,6 +23,9 @@ const updateAddToCartProduct = require('../controller/user/updateAddToCartProduc
 const deleteAddToCartProduct = require('../controller/user/deleteAddToCartProduct')
 const searchProduct = require('../controller/product/searchProduct')
 const filterProductController = require('../controller/product/filterProduct')
+const checkoutController = require('../controller/user/checkoutController')
+const getCartController = require('../controller/user/getCartController')
+const deleteCartItemController = require('../controller/user/deleteCartItemController')
 
 
 
@@ -35,7 +39,7 @@ router.get("/all-user",authToken,allUsers)
 router.post("/update-user",authToken,updateUser)
 
 //product
-router.post("/upload-product",authToken,UploadProductController)
+router.post("/upload-product",authToken, upload.array('productImage', 5), UploadProductController)
 router.get("/get-product",getProductController)
 router.post("/update-product",authToken,updateProductController)
 router.get("/get-categoryProduct",getCategoryProduct)
@@ -50,6 +54,14 @@ router.get("/countAddToCartProduct",authToken,countAddToCartProduct)
 router.get("/view-card-product",authToken,addToCartViewProduct)
 router.post("/update-cart-product",authToken,updateAddToCartProduct)
 router.post("/delete-cart-product",authToken,deleteAddToCartProduct)
+
+//REST API endpoints - Products and Cart
+router.get("/products",getProductController)
+router.get("/cart",authToken,getCartController)
+router.post("/cart",authToken,addToCartController)
+router.delete("/cart/:id",authToken,deleteCartItemController)
+router.post("/checkout",authToken,checkoutController)
+
 
 
 

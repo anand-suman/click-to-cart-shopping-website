@@ -4,6 +4,7 @@ import displayINRCurrency from '../helpers/displayCurrency'
 import { FaAngleLeft, FaAngleRight } from 'react-icons/fa6'
 import { Link } from 'react-router-dom'
 import addToCart from '../helpers/addToCart'
+import { backendDomin } from '../common'
 import Context from '../context'
 
 const HorizontalCardProduct = ({category, heading}) => {
@@ -27,8 +28,8 @@ const HorizontalCardProduct = ({category, heading}) => {
         const categoryProduct = await fetchCategoryWiseProduct(category)
         setLoading(false)
 
-        console.log("horizontal data",categoryProduct.data)
-        setData(categoryProduct?.data)
+        console.log("horizontal data",categoryProduct?.data)
+        setData(Array.isArray(categoryProduct?.data) ? categoryProduct.data : [])
     }
 
     useEffect(()=>{
@@ -74,11 +75,17 @@ const HorizontalCardProduct = ({category, heading}) => {
                     )
                 })
            ) : (
-            data.map((product,index)=>{
+            (Array.isArray(data) ? data : []).map((product,index)=>{
                 return(
                     <Link to={"product/"+product?._id} className='w-full min-w-[280px] md:min-w-[320px] max-w-[280px] md:max-w-[320px] h-36 bg-white rounded-sm shadow flex'>
-                        <div className='bg-slate-200 h-full p-4 min-w-[120px] md:min-w-[145px]'>
-                            <img src={product.productImage[0]} className='object-scale-down h-full hover:scale-110 transition-all'/>
+                        <div className='bg-slate-200 h-full p-4 min-w-[120px] md:min-w-[145px] flex items-center justify-center'>
+                            {
+                                product?.productImage?.[0]
+                                ? <img src={(product?.productImage?.[0]?.startsWith('/uploads') ? (backendDomin + product?.productImage?.[0]) : product?.productImage?.[0])} alt={product?.productName || product?.category || 'Product'} className='object-scale-down h-full hover:scale-110 transition-all'/>
+                                : <span className='text-xs md:text-sm text-center px-2'>
+                                    {product?.productName || product?.category || 'Image not available'}
+                                  </span>
+                            }
                         </div>
                         <div className='p-4 grid'>
                             <h2 className='font-medium text-base md:text-lg text-ellipsis line-clamp-1 text-black'>{product?.productName}</h2>

@@ -76,8 +76,30 @@ const SummaryApi = {
     filterProduct : {
         url : `${backendDomin}/api/filter-product`,
         method : 'post'
+    },
+    // REST API endpoints
+    products : {
+        url : `${backendDomin}/api/products`,
+        method : 'get'
+    },
+    cart : {
+        url : `${backendDomin}/api/cart`,
+        method : 'get'
+    },
+    addToCart : {
+        url : `${backendDomin}/api/cart`,
+        method : 'post'
+    },
+    deleteCartItem : {
+        url : `${backendDomin}/api/cart`,
+        method : 'delete'
+    },
+    checkout : {
+        url : `${backendDomin}/api/checkout`,
+        method : 'post'
     }
 }
 
 
 export default SummaryApi
+export { backendDomin }

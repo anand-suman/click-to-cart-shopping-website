@@ -2,24 +2,41 @@ const addToCartModel = require("../../models/cartProduct")
 
 const addToCartController = async(req,res)=>{
     try{
-        const { productId } = req?.body
+        const { productId, qty } = req?.body
         const currentUser = req.userId
 
-        const isProductAvailable = await addToCartModel.findOne({ productId })
-
-        console.log("isProductAvailabl   ",isProductAvailable)
-
-        if(isProductAvailable){
-            return res.json({
-                message : "Already exits in Add to cart",
+        if(!productId){
+            return res.status(400).json({
+                message : "Product ID is required",
                 success : false,
                 error : true
             })
         }
 
+        // Check if product already exists in cart for this user
+        const isProductAvailable = await addToCartModel.findOne({ 
+            productId, 
+            userId: currentUser 
+        })
+
+        console.log("isProductAvailabl   ",isProductAvailable)
+
+        if(isProductAvailable){
+            // Update quantity if product already exists
+            isProductAvailable.quantity = (isProductAvailable.quantity || 1) + (qty || 1)
+            const saveProduct = await isProductAvailable.save()
+            
+            return res.json({
+                data : saveProduct,
+                message : "Cart updated",
+                success : true,
+                error : false
+            })
+        }
+
         const payload  = {
             productId : productId,
-            quantity : 1,
+            quantity : qty || 1,
             userId : currentUser,
         }
 
