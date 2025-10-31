@@ -388,7 +388,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## 👨‍💻 Author
 
-Full Stack E-Commerce MERN Application
+- **Anand Suman** - [@anand-suman](https://github.com/anand-suman)
 
 ## 📞 Support
 
