@@ -9,9 +9,13 @@ async function ensureAdmin() {
   try {
     await connectDB();
 
-    const email = 'admin1@yopmail.com';
-    const plainPassword = 'Admin@123';
-    const name = 'Admin';
+    const email = process.env.ADMIN_EMAIL;
+    const plainPassword = process.env.ADMIN_PASSWORD;
+    const name = process.env.ADMIN_NAME || 'Admin';
+
+    if (!email || !plainPassword) {
+      throw new Error('ADMIN_EMAIL and ADMIN_PASSWORD must be set in environment variables');
+    }
 
     let user = await userModel.findOne({ email });
 
